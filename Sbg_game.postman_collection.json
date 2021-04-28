@@ -1,0 +1,298 @@
+{
+	"info": {
+		"_postman_id": "36d87bd4-e112-4616-9d2e-fd6f6a6681d4",
+		"name": "SbgGameTest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "UnHappyPathQuery",
+			"item": [
+				{
+					"name": "Get_GameWith_Invalid_Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res=pm.response.json();\r",
+									"//GraphQl returning statusCode 200 for all responses. Check JSON response have property ERROR to assert failed.\r",
+									"pm.test(\"Game api has not returned any values and valid error log message is returned\",function()\r",
+									"{\r",
+									"    pm.expect(res).to.have.property(\"errors\")\r",
+									"    console.log(res.errors[0].message)\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query\r\n  {\r\n    game(id:{{id}})\r\n    { id \r\n      name\r\n      slug   \r\n    }\r\n  }",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{protocol}}{{baseUrl}}{{endPoint}}",
+							"host": [
+								"{{protocol}}{{baseUrl}}{{endPoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "HappyPathQuery",
+			"item": [
+				{
+					"name": "GetGame",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(responseCode.code == 200 )\r",
+									"{\r",
+									"    pm.test(\"check the status code is 200\", function () {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    var res=pm.response.json();\r",
+									"    pm.test(\"check game has property name\", function () {\r",
+									"        pm.expect(res.data.game).to.have.property(\"name\");\r",
+									"        console.log(\"success\")\r",
+									"        }); \r",
+									"    pm.test(\"check game has property slug\", function () {\r",
+									"        pm.expect(res.data.game).to.have.property(\"slug\");\r",
+									"        }); \r",
+									"    pm.test(\"check game has property supplier\",function()\r",
+									"    {\r",
+									"        pm.expect(res.data.game).to.have.property(\"supplier\");\r",
+									"    })\r",
+									"    pm.test(\"check game has property id and id value is same as provided in data file \",function()\r",
+									"    {\r",
+									"        pm.expect(res.data.game).to.have.property(\"id\");\r",
+									"        pm.expect(res.data.game.id == data.id);\r",
+									"\r",
+									"    })\r",
+									"\r",
+									"    pm.test(\"check game api has not returned any errors\",function()\r",
+									"    {\r",
+									"        pm.expect(res).not.to.have.property(\"errors\")\r",
+									"    })\r",
+									"\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query\r\n  {\r\n    game(id:{{id}})\r\n    { id \r\n      name\r\n      slug   \r\n      supplier {\r\n          id\r\n          name\r\n      }             \r\n    }\r\n  }",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{protocol}}{{baseUrl}}{{endPoint}}",
+							"host": [
+								"{{protocol}}{{baseUrl}}{{endPoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "UnHappyPathMutation",
+			"item": [
+				{
+					"name": "Add_Game_SupplierNotMatchingToDataFile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res=pm.response.json();\r",
+									"console.log(res)\r",
+									"\r",
+									"if(responseCode.code == 200 )\r",
+									"{\r",
+									"    pm.collectionVariables.set(\"id\",res.data.addGame.id)\r",
+									"    \r",
+									"    pm.test(\"check name is same as in datafile\", function () {\r",
+									"        if(res.data.addGame.name==data.name)\r",
+									"            console.log(\"Game Name created is correct\"+ data.name);\r",
+									"        else\r",
+									"            console.log(\"Game Name created NOT correct\"+ data.name);\r",
+									"        }); \r",
+									"    pm.test(\"check Slug is same as in datafile\", function () {\r",
+									"        pm.expect(res.data.addGame.slug,'').to.equal(data.slug)\r",
+									"        if(res.data.addGame.slug==data.slug)\r",
+									"            console.log(\"Game Slug created is correct\"+ data.slug);\r",
+									"        else\r",
+									"            console.log(\"Game Slug created NOT correct\"+ data.slug);\r",
+									"        }); \r",
+									"    pm.test(\"check if supplier is same as in datafile\",function(){\r",
+									"        pm.expect(res.data.addGame.supplier.id,`Input Supplier id ${data.supplier} is not matching to the id added onto games data ${res.data.addGame.supplier.id}`).to.equal(parseInt(data.supplier))  \r",
+									"        })\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n  addGame(input: {\r\n     name: \"{{name}}\",\r\n      slug: \"{{slug}}\",\r\n     supplier: \"{{supplier}}\" } ) \r\n\t{  \r\n      id  \r\n      name\r\n      slug \r\n      supplier {\r\n          id\r\n      }\r\n    }}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{protocol}}{{baseUrl}}{{endPoint}}",
+							"host": [
+								"{{protocol}}{{baseUrl}}{{endPoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "HappyPathMutation",
+			"item": [
+				{
+					"name": "AddGame",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res=pm.response.json();\r",
+									"console.log(res)\r",
+									"\r",
+									"if(responseCode.code == 200 )\r",
+									"{\r",
+									"    pm.collectionVariables.set(\"id\",res.data.addGame.id)\r",
+									"    pm.test(\"check name is same as in datafile\", function () {\r",
+									"        if(res.data.addGame.name==data.name)\r",
+									"            console.log(\"Game Name created is correct\"+ data.name);\r",
+									"        else\r",
+									"            console.log(\"Game Name created NOT correct\"+ data.name);\r",
+									"        }); \r",
+									"    pm.test(\"check Slug is same as in datafile\", function () {\r",
+									"        pm.expect(res.data.addGame.slug).to.equal(data.slug)\r",
+									"        if(res.data.addGame.slug==data.slug)\r",
+									"            console.log(\"Game Slug created is correct\"+ data.slug);\r",
+									"        else\r",
+									"            console.log(\"Game Slug created NOT correct\"+ data.slug);\r",
+									"        }); \r",
+									"    pm.test(\"check if supplier is same as in datafile\",function(){\r",
+									"        pm.expect(res.data.addGame.supplier.id,`Input Supplier id ${data.supplier} is not matching to the id added onto games data ${res.data.addGame.supplier.id}`).to.equal(parseInt(data.supplier))  \r",
+									"        })\r",
+									"    pm.test(\"check addGame api has not returned any errors\",function() {\r",
+									"            pm.expect(res).not.to.have.property(\"errors\")\r",
+									"        })\r",
+									"\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n  addGame(input: {\r\n     name: \"{{name}}\",\r\n      slug: \"{{slug}}\",\r\n     supplier: \"{{supplier}}\" } ) \r\n\t{  \r\n      id  \r\n      name\r\n      slug \r\n      supplier {\r\n          id\r\n      }\r\n    }}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{protocol}}{{baseUrl}}{{endPoint}}",
+							"host": [
+								"{{protocol}}{{baseUrl}}{{endPoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "name",
+			"value": ""
+		},
+		{
+			"key": "protocol",
+			"value": "http:"
+		},
+		{
+			"key": "baseUrl",
+			"value": "//localhost:4000"
+		},
+		{
+			"key": "endPoint",
+			"value": "/graphql"
+		},
+		{
+			"key": "supplier",
+			"value": ""
+		},
+		{
+			"key": "slug",
+			"value": ""
+		}
+	]
+}
